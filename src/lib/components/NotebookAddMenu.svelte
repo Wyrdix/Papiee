@@ -30,7 +30,7 @@
 		setTimeout(() => {
 			const begin = widget.getBegin(new_node);
 			notebook_state[i] = widget.moveTo(new_node, begin);
-		});
+		}, 20);
 	}
 </script>
 

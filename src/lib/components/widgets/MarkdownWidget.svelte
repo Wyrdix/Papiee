@@ -5,7 +5,7 @@
 	import MarkdownIt from 'markdown-it';
 	import type { WidgetProps } from '$lib/notebook/widgets/types';
 	import type { MarkdownWidgetValue } from '$lib/notebook/widgets/markdown/structure';
-	import { BrickWallIcon, Edit, PickaxeIcon } from '@lucide/svelte';
+	import { BrickWallIcon, PickaxeIcon } from '@lucide/svelte';
 	import { EditorView } from 'codemirror';
 
 	let { value, onNodeValueUpdate, setAnchorNode }: WidgetProps<MarkdownWidgetValue> = $props();
