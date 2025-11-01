@@ -1,3 +1,5 @@
+import { type MathfieldElementAttributes } from 'mathlive';
+
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
@@ -10,4 +12,9 @@ declare global {
 	}
 }
 
+declare namespace svelteHTML {
+	interface IntrinsicElements {
+		'math-field': MathfieldElementAttributes;
+	}
+}
 export {};

@@ -45,6 +45,13 @@
 		"@types/markdown-it": "^14.1.2",
 		"codemirror": "^6.0.2",
 		"markdown-it": "^14.1.0",
+		"mathlive": "^0.107.1",
+		"prosemirror-inputrules": "^1.5.1",
+		"prosemirror-keymap": "^1.2.3",
+		"prosemirror-model": "^1.25.4",
+		"prosemirror-state": "^1.4.3",
+		"prosemirror-transform": "^1.10.4",
+		"prosemirror-view": "^1.41.3",
 		"svelte-codemirror-editor": "^2.1.0"
 	}
 }
