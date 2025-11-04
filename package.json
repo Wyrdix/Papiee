@@ -42,6 +42,7 @@
 	"dependencies": {
 		"@codemirror/lang-markdown": "^6.4.0",
 		"@lucide/svelte": "^0.546.0",
+		"@prosemirror-adapter/svelte": "^0.4.6",
 		"@types/markdown-it": "^14.1.2",
 		"codemirror": "^6.0.2",
 		"markdown-it": "^14.1.0",
