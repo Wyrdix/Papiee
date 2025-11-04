@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { MathLiveNodeView } from '$lib/prosemirror-papiee-cnl/mathlive_inputview';
-	import SCHEMA from '$lib/prosemirror-papiee-cnl/schema';
+	import { schema } from '$lib/prosemirror-papiee-cnl/schema';
 	import { EditorState } from 'prosemirror-state';
 	import { EditorView } from 'prosemirror-view';
 	import type { Node } from 'prosemirror-model';
@@ -29,7 +29,7 @@
 		if (!diva) return;
 
 		editor_state = EditorState.create({
-			schema: SCHEMA,
+			schema: schema,
 			plugins: MATHLIVE_PLUGINS
 		});
 
@@ -77,12 +77,12 @@
 		let match;
 		while ((match = regex.exec(text))) {
 			if (match[1]) {
-				nodes.push(SCHEMA.node('math', { latex: match[1] }));
+				nodes.push(schema.node('math', { latex: match[1] }));
 			} else if (match[2]) {
-				nodes.push(SCHEMA.text(match[2]));
+				nodes.push(schema.text(match[2]));
 			}
 		}
-		return SCHEMA.node('doc', null, nodes);
+		return schema.node('doc', null, nodes);
 	}
 
 	function unparse(doc: Node) {

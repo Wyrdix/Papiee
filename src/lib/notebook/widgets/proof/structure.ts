@@ -1,11 +1,10 @@
 import { register } from '$lib/notebook/structure';
 import type { Widget, WidgetValue } from '$lib/notebook/widgets/types';
 import { NotebookPenIcon } from '@lucide/svelte';
-import type { ProofDocumentValue } from './values';
-import ProofDocument from '$lib/components/widgets/proof/ProofDocument.svelte';
+import ProofWidgetC from '$lib/components/widgets/proof/ProofWidget.svelte';
 
 export type ProofWidget = Widget<number, 'proof', ProofWidgetValue, 'value'>;
-export type ProofWidgetValue = WidgetValue<number> & { value: ProofDocumentValue };
+export type ProofWidgetValue = WidgetValue<number> & { value: string };
 
 declare module '$lib/notebook/structure' {
 	interface RootWidgetMap {
@@ -18,11 +17,11 @@ export const PROOF_WIDGET: ProofWidget = {
 	name: 'Proof',
 	icon: NotebookPenIcon,
 
-	component: ProofDocument,
+	component: ProofWidgetC,
 	initial() {
 		return {
 			type: 'proof',
-			value: '',
+			value: 'Test1\n\tTest1.2\n\t\tTest2\n\t\t\tTest3',
 			position: undefined
 		};
 	},

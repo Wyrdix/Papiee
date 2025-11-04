@@ -1,4 +1,4 @@
-import SCHEMA from '$lib/prosemirror-papiee-cnl/schema';
+import { schema } from '$lib/prosemirror-papiee-cnl/schema';
 import { keymap } from 'prosemirror-keymap';
 import { Plugin, Selection, TextSelection } from 'prosemirror-state';
 import * as mathlive from 'mathlive';
@@ -60,7 +60,7 @@ export const MATHLIVE_SELECTION_PLUGIN = new Plugin({
 
 export const MATHLIVE_MATHMODE = keymap({
 	$: (state, dispatch, view) => {
-		const mathNode = SCHEMA.nodes.math.createAndFill({ latex: '' })!;
+		const mathNode = schema.nodes.math.createAndFill({ latex: '' })!;
 		const { from, to } = state.selection;
 		const tr = state.tr.replaceRangeWith(from, to, mathNode);
 
