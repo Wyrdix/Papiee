@@ -3,7 +3,40 @@ import { Schema } from 'prosemirror-model';
 
 const SCHEMA = new Schema({
 	nodes: {
-		doc: { content: 'inline*' },
+		doc: { content: 'paragraph*' },
+		paragraph: {
+			content: 'line content?',
+			toDOM(node) {
+				return ['div', { class: 'paragraph' }, 0];
+			},
+			parseDOM: [
+				{
+					tag: 'div.paragraph'
+				}
+			]
+		},
+		line: {
+			content: 'inline*',
+			toDOM(node) {
+				return ['div', { class: 'paragraph-line' }, 0];
+			},
+			parseDOM: [
+				{
+					tag: 'div.paragraph-line'
+				}
+			]
+		},
+		content: {
+			content: 'paragraph+',
+			toDOM(node) {
+				return ['div', { class: 'paragraph-content' }, 0];
+			},
+			parseDOM: [
+				{
+					tag: 'div.paragraph-content'
+				}
+			]
+		},
 		text: {
 			group: 'inline',
 			toDOM(node) {
