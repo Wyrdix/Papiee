@@ -21,23 +21,38 @@
 			...keymap({
 				Enter: (state, dispatch, view) => {
 					const head = state.selection.$head;
-					const content_i = direct_parent_depth(head, 'content');
-					const parent_content_i = direct_parent_depth(head, 'content', 1);
 
 					// If at first level we can't reduce the indent
 					const paragraph = head.node(direct_parent_depth(head, 'paragraph'));
 
+					const line = head.node(direct_parent_depth(head, 'line'));
+					const preserved = line.textContent.substring(0, head.parentOffset);
+					const new_line = line.textContent.substring(head.parentOffset);
+
+					const start = head.start(direct_parent_depth(head, 'paragraph'));
+					const end = head.end(direct_parent_depth(head, 'paragraph'));
 					const hasChildren = paragraph.childCount > 1;
 					if (!hasChildren) {
-						const content_end = head.end(content_i + 1);
 						if (dispatch) {
 							let tr = state.tr;
-							tr = state.tr.insert(
-								content_end,
-								schema.nodes.paragraph.create(undefined, schema.nodes.line.create())
-							);
-
-							tr = tr.setSelection(Selection.near(tr.doc.resolve(tr.mapping.map(content_end))));
+							tr = tr.replaceWith(start - 1, end + 1, [
+								schema.nodes.paragraph.create(undefined, [
+									schema.nodes.line.create(
+										undefined,
+										preserved.length === 0 ? undefined : schema.text(preserved)
+									)
+								]),
+								schema.nodes.paragraph.create(undefined, [
+									schema.nodes.line.create(
+										undefined,
+										new_line.length === 0 ? undefined : schema.text(new_line)
+									)
+								])
+							]);
+							let rebuild_selection_head = tr.doc.resolve(start).after(); // Before 2nd paragraph
+							rebuild_selection_head += 2; // Enter paragraph then line
+							tr.doc.check();
+							tr = tr.setSelection(Selection.near(tr.doc.resolve(rebuild_selection_head)));
 							dispatch(tr);
 							return true;
 						}
@@ -46,19 +61,28 @@
 							let tr = state.tr;
 
 							tr = tr.replaceRangeWith(
-								head.start(direct_parent_depth(head, 'paragraph')) - 1,
-								head.end(direct_parent_depth(head, 'paragraph')) + 1,
+								start - 1,
+								end + 1,
 								schema.nodes.paragraph.create(undefined, [
-									paragraph.child(0),
+									schema.nodes.line.create(
+										undefined,
+										preserved.length === 0 ? undefined : schema.text(preserved)
+									),
 									schema.nodes.content.create(undefined, [
-										schema.nodes.paragraph.create(undefined, schema.nodes.line.create()),
+										schema.nodes.paragraph.create(
+											undefined,
+											schema.nodes.line.create(
+												undefined,
+												new_line.length === 0 ? undefined : schema.text(new_line)
+											)
+										),
 										...paragraph.child(1).children
 									])
 								])
 							);
 							tr.doc.check();
 
-							let rebuild_selection_head = head.after(direct_parent_depth(head, 'paragraph') + 1);
+							let rebuild_selection_head = tr.doc.resolve(start).posAtIndex(1); // Before begin of content
 							rebuild_selection_head += 3; // Enter content, paragraph and line
 							tr = tr.setSelection(Selection.near(tr.doc.resolve(rebuild_selection_head)));
 
