@@ -1,9 +1,7 @@
 <script lang="ts" module>
 	export const ContentNodeView = (factory: NodeViewFactory) =>
 		factory({
-			component: Content,
-			as: 'div',
-			contentAs: 'p'
+			component: Content
 		});
 	export const plugins: Plugin[] = [];
 </script>
@@ -21,4 +19,6 @@
 	let isRoot = $derived(get(node) === view.state.doc.child(0));
 </script>
 
-<div use:contentRef class:ml-5={!isRoot}></div>
+<div class="paragraph-content">
+	<div use:contentRef class:ml-5={!isRoot}></div>
+</div>

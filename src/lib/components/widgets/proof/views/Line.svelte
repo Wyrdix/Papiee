@@ -1,9 +1,7 @@
 <script lang="ts" module>
 	export const LineNodeView = (factory: NodeViewFactory) =>
 		factory({
-			component: Line,
-			as: 'div',
-			contentAs: 'p'
+			component: Line
 		});
 	export const plugins: Plugin[] = [];
 </script>
@@ -16,4 +14,12 @@
 	const contentRef = useNodeViewContext('contentRef');
 </script>
 
-<div class="min-h-4 border" use:contentRef></div>
+<div class="line min-h-4 py-1" use:contentRef></div>
+
+<style>
+	.line {
+		word-break: break-all;
+		text-wrap-mode: wrap;
+		max-width: 90%;
+	}
+</style>

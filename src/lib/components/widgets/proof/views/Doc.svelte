@@ -1,9 +1,7 @@
 <script lang="ts" module>
 	export const DocNodeView = (factory: NodeViewFactory) =>
 		factory({
-			component: Doc,
-			as: 'div',
-			contentAs: 'p'
+			component: Doc
 		});
 	export const plugins: Plugin[] = [];
 </script>

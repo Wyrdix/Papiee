@@ -2,7 +2,7 @@
 	import { MATHLIVE_PLUGINS } from '$lib/prosemirror-papiee-cnl/plugins';
 	import { schema } from '$lib/prosemirror-papiee-cnl/schema';
 	import { useNodeViewFactory } from '@prosemirror-adapter/svelte';
-	import { EditorState, Plugin } from 'prosemirror-state';
+	import { EditorState, Plugin, Selection, TextSelection } from 'prosemirror-state';
 	import { EditorView } from 'prosemirror-view';
 	import { ParagraphNodeView, plugins as paragraph_plugins } from './views/Paragraph.svelte';
 	import type { Node } from 'prosemirror-model';
@@ -33,7 +33,20 @@
 				paragraph_plugins,
 				doc_plugins,
 				line_plugins,
-				content_plugins
+				content_plugins,
+				new Plugin({
+					filterTransaction(tr, state) {
+						const { $anchor: anchor, $from: from, $to: to, $head: head } = tr.selection;
+
+						const begin = anchor.$start();
+						const end = anchor.$end();
+
+						const sel_start = begin.max(from);
+						const sel_end = end.min(to);
+
+						return sel_start.pos === from.pos && sel_end.pos === to.pos;
+					}
+				})
 			].flat(),
 			doc: node
 		});
@@ -44,6 +57,9 @@
 				doc: DocNodeView(nodeViewFactory),
 				line: LineNodeView(nodeViewFactory),
 				content: ContentNodeView(nodeViewFactory)
+			},
+			attributes(state) {
+				return { spellcheck: 'false' };
 			}
 		});
 
@@ -57,10 +73,14 @@
 	};
 </script>
 
-<div use:editor></div>
+<div class="ProseMirror" use:editor></div>
 
 <style>
 	:global(.ProseMirror:focus) {
 		outline: none;
+	}
+
+	.ProseMirror {
+		font-family: inherit;
 	}
 </style>

@@ -21,7 +21,7 @@ export const PROOF_WIDGET: ProofWidget = {
 	initial() {
 		return {
 			type: 'proof',
-			value: 'Test1\n\tTest1.2\n\t\tTest2\n\t\t\tTest3',
+			value: 'Test1\n\tTest1.2\nTest2\n\tTest3',
 			position: undefined
 		};
 	},
