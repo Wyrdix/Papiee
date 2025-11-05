@@ -5,12 +5,13 @@
 	import { EditorState, Plugin, Selection, TextSelection } from 'prosemirror-state';
 	import { EditorView } from 'prosemirror-view';
 	import { ParagraphNodeView, plugins as paragraph_plugins } from './views/Paragraph.svelte';
-	import type { Node } from 'prosemirror-model';
+	import { Slice, type Node } from 'prosemirror-model';
 	import { DocNodeView, plugins as doc_plugins } from './views/Doc.svelte';
 	import { LineNodeView, plugins as line_plugins } from './views/Line.svelte';
 	import { ContentNodeView, plugins as content_plugins } from './views/Content.svelte';
 	import { unparse } from '$lib/cnl/parser';
 	import '$lib/resolvedpos';
+	import { keymap } from 'prosemirror-keymap';
 
 	let { node = $bindable(), onView }: { node?: Node; onView?: (view: EditorView) => void } =
 		$props();
@@ -35,6 +36,7 @@
 				doc_plugins,
 				line_plugins,
 				content_plugins,
+				// Prevent selection from spanning multiple elements
 				new Plugin({
 					filterTransaction(tr, state) {
 						const { $anchor: anchor, $from: from, $to: to, $head: head } = tr.selection;
@@ -61,6 +63,13 @@
 			},
 			attributes(state) {
 				return { spellcheck: 'false' };
+			},
+			// As long a copy/paste is broken prevent it
+			transformCopied(slice, view) {
+				return Slice.empty;
+			},
+			transformPasted(slice, view, plain) {
+				return Slice.empty;
 			}
 		});
 
