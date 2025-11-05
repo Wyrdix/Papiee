@@ -60,7 +60,7 @@ export const MATHLIVE_SELECTION_PLUGIN = new Plugin({
 
 export const MATHLIVE_MATHMODE = keymap({
 	$: (state, dispatch, view) => {
-		const mathNode = schema.nodes.math.createAndFill({ latex: '' })!;
+		const mathNode = schema.nodes.math.create({ latex: 'x' })!;
 		const { from, to } = state.selection;
 		const tr = state.tr.replaceRangeWith(from, to, mathNode);
 
