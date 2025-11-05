@@ -164,12 +164,15 @@
 					if (paragraph_index === 0) return true;
 
 					const previous_sibling = head.posAtIndex(paragraph_index - 1, content_i) + 1;
+
+					const start = state.doc.resolve(previous_sibling).start();
+
 					const prev_paragraph = state.doc.resolve(previous_sibling).node();
 					const paragraph = head.node(paragraph_i);
 					if (dispatch) {
 						let tr = state.tr;
 						tr = tr.replaceRangeWith(
-							previous_sibling - 1,
+							start - 1,
 							head.end(paragraph_i) + 1,
 							schema.nodes.paragraph.create(undefined, [
 								prev_paragraph.child(0),
@@ -180,8 +183,12 @@
 							])
 						);
 
-						let rebuild_selection_head = tr.doc.resolve(previous_sibling + 1).after(); // Before paragraph content
-						rebuild_selection_head += 3; // Enter content paragraph and line
+						let rebuild_selection_head = tr.doc.resolve(start).posAtIndex(1); // Before paragraph content
+						rebuild_selection_head += 1; // Enter content
+						rebuild_selection_head = tr.doc
+							.resolve(rebuild_selection_head)
+							.posAtIndex(tr.doc.resolve(rebuild_selection_head).node().childCount - 1);
+						rebuild_selection_head += 2; // Enter content paragraph and line
 						rebuild_selection_head += head.parentOffset;
 						tr = tr.setSelection(Selection.near(tr.doc.resolve(rebuild_selection_head)));
 						tr.doc.check();
@@ -202,7 +209,7 @@
 	import { nodes, schema } from '$lib/prosemirror-papiee-cnl/schema';
 	import { keymap } from 'prosemirror-keymap';
 	import Paragraph from './Paragraph.svelte';
-	import type { ResolvedPos } from 'prosemirror-model';
+	import { type ResolvedPos } from 'prosemirror-model';
 
 	const contentRef = useNodeViewContext('contentRef');
 </script>
