@@ -12,7 +12,8 @@
 	import { unparse } from '$lib/cnl/parser';
 	import '$lib/resolvedpos';
 
-	let { node = $bindable() }: { node?: Node } = $props();
+	let { node = $bindable(), onView }: { node?: Node; onView?: (view: EditorView) => void } =
+		$props();
 
 	const nodeViewFactory = useNodeViewFactory();
 
@@ -70,6 +71,7 @@
 				);
 			}
 		});
+		if (onView) onView(editorView);
 	};
 </script>
 
