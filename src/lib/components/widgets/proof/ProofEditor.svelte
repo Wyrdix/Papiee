@@ -10,6 +10,7 @@
 	import { LineNodeView, plugins as line_plugins } from './views/Line.svelte';
 	import { ContentNodeView, plugins as content_plugins } from './views/Content.svelte';
 	import { unparse } from '$lib/cnl/parser';
+	import '$lib/resolvedpos';
 
 	let { node = $bindable() }: { node?: Node } = $props();
 
