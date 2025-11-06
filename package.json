@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
+		"postinstall": "node installation.js",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
@@ -47,6 +48,7 @@
 		"codemirror": "^6.0.2",
 		"markdown-it": "^14.1.0",
 		"mathlive": "^0.107.1",
+		"nearley": "^2.20.1",
 		"prosemirror-inputrules": "^1.5.1",
 		"prosemirror-keymap": "^1.2.3",
 		"prosemirror-model": "^1.25.4",

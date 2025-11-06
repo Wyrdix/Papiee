@@ -21,3 +21,7 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Generated
+
+src/lib/cnl/cnl_tactic_specifier.ts
