@@ -2,14 +2,13 @@
 	import { onMount } from 'svelte';
 	import { createTacticFromTextual } from '$lib/cnl/cnl_tactic';
 	import nearley from 'nearley';
-	import { parse_proposition, parse_proposition_chained } from '$lib/cnl/parser';
+	import { predict } from '$lib/cnl/prediction';
 	const { Grammar, Parser } = nearley;
 
 	onMount(() => {
-		const cnl1 = createTacticFromTextual(undefined, '{|Soit $|x|$.#|+st}', () => '');
-		const cnl2 = createTacticFromTextual(undefined, '{st|Soit $|x|$.|+st2}', () => '');
+		const cnl2 = createTacticFromTextual(undefined, '{|Soit |A|e.#|+st}', () => '');
 		const cnl3 = createTacticFromTextual(undefined, '{st2|A.|}', () => '');
-		console.log(parse_proposition_chained('Soit $a2$.Soit $a$.A.'));
+		console.log(predict('', ['st2']));
 	});
 </script>
 

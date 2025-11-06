@@ -11,6 +11,7 @@ import type {
 	Text
 } from './cnl_tactic_specifier';
 import type { CnlTactic } from './cnl_tactic';
+import { Lexer } from './lexer';
 
 export function filterToName(filter?: string): string {
 	if (!filter) return `FILTER_DEFAULT`;
@@ -48,20 +49,24 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 		{ name: _space_1_id, symbols: [{ literal: ' ' }], postprocess: (d) => d[0].text }
 	];
 
-	const _everything = generate();
+	const _everything = generate() + '#EVERYTHING';
 	const EVERYTHING: ParserRule[] = [
 		{
 			name: _everything,
 			symbols: [
 				{
 					test: (v: any) => {
+						if (typeof v === 'object' && 'value' in v) v = v.value;
 						return typeof v === 'string' && v !== '$';
 					}
 				} as Symbol,
 				_everything
 			],
 			postprocess(d, loc, reject) {
-				return d[0] + d[1];
+				return d
+					.flat()
+					.map((v) => (typeof v === 'string' ? v : v?.value || ''))
+					.join('');
 			}
 		},
 		{
@@ -69,12 +74,17 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 			symbols: [
 				{
 					test: (v: any) => {
+						if (typeof v === 'object' && 'value' in v) v = v.value;
 						return v !== '$' || (typeof v === 'object' && v.type === 'stop_everything');
 					}
 				} as Symbol
 			],
 			postprocess(d, loc, reject) {
-				return d[0];
+				if (typeof d[0] === 'object' && d[0].type === 'stop_everything') return undefined;
+				return d
+					.flat()
+					.map((v) => (typeof v === 'string' ? v : v.value))
+					.join('');
 			}
 		}
 	];
@@ -115,7 +125,7 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 					name: id,
 					symbols: specifications
 						.map((v, i) =>
-							[v[0] satisfies Symbol].concat(i < specifications.length - 2 ? [_space_0_id] : [])
+							[v[0] satisfies Symbol].concat(i < specifications.length - 2 ? [_space_1_id] : [])
 						)
 						.flat(),
 					postprocess(d, loc, reject) {
@@ -149,7 +159,7 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 	}
 
 	function reference(v: Reference): [string, ParserRule[]] {
-		const id = generate() + '_' + v.reference;
+		const id = generate() + '_' + v.reference + '#REF' + v.reference;
 		if (reference_value_type.has(v.reference)) reference_value_type.set(v.reference, 'list');
 		else reference_value_type.set(v.reference, 'unique');
 
@@ -164,8 +174,9 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 							type: v.reference,
 							value: d[0]
 						};
-					}
-				}
+					},
+					test: 1
+				} as ParserRule
 			]
 		];
 	}
@@ -244,6 +255,7 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 	];
 
 	const grammar = {
+		Lexer: new Lexer(),
 		ParserRules: compiled_sentence
 			.map((v) => v[1])
 			.flat()

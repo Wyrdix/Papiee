@@ -36,9 +36,9 @@ export function parse_proposition(
 	return max;
 }
 
-export function parse_proposition_chained(value: string, offset: number = 0, state: string[] = []) {
+export function parse_proposition_chained(value: string, state: string[] = []) {
 	let _state = [...state];
-	let _offset = offset;
+	let _offset = 0;
 
 	let result: ReturnType<typeof parse_proposition> = undefined;
 	let parsed: ParseResult[] = [];
