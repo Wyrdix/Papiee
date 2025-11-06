@@ -3,7 +3,7 @@
 
 	import type { WidgetProps } from '$lib/notebook/widgets/types';
 	import type { ProofWidgetValue } from '$lib/notebook/widgets/proof/structure';
-	import { parse, unparse } from '$lib/cnl/parser';
+	import { parse, unparse } from '$lib/cnl/textual';
 	import ProofEditor from './ProofEditor.svelte';
 	import type { EditorView } from 'prosemirror-view';
 

@@ -2,16 +2,15 @@
 	import { MATHLIVE_PLUGINS } from '$lib/prosemirror-papiee-cnl/plugins';
 	import { schema } from '$lib/prosemirror-papiee-cnl/schema';
 	import { useNodeViewFactory } from '@prosemirror-adapter/svelte';
-	import { EditorState, Plugin, Selection, TextSelection } from 'prosemirror-state';
+	import { EditorState, Plugin } from 'prosemirror-state';
 	import { EditorView } from 'prosemirror-view';
 	import { ParagraphNodeView, plugins as paragraph_plugins } from './views/Paragraph.svelte';
 	import { Slice, type Node } from 'prosemirror-model';
 	import { DocNodeView, plugins as doc_plugins } from './views/Doc.svelte';
 	import { LineNodeView, plugins as line_plugins } from './views/Line.svelte';
 	import { ContentNodeView, plugins as content_plugins } from './views/Content.svelte';
-	import { unparse } from '$lib/cnl/parser';
+	import { unparse } from '$lib/cnl/textual';
 	import '$lib/resolvedpos';
-	import { keymap } from 'prosemirror-keymap';
 	import { MathLiveNodeView } from '$lib/prosemirror-papiee-cnl/mathlive_inputview';
 
 	let { node = $bindable(), onView }: { node?: Node; onView?: (view: EditorView) => void } =
