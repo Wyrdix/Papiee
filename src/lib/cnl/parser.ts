@@ -16,6 +16,7 @@ export type CNLParseResult = {
 export type CNLParseResultChained = {
 	offset: number;
 	result: ParseResult[];
+	ends: number[];
 	state: string[];
 	action?: StructureSpecification['specification'];
 };
@@ -64,10 +65,12 @@ export function parse_cnl_chained(value: string, state: string[] = []): CNLParse
 
 	let result: ReturnType<typeof parse_cnl> = undefined;
 	let parsed: ParseResult[] = [];
+	let ends: number[] = [];
 	do {
 		result = parse_cnl(value.substring(_offset), _state);
 		if (!result) continue;
 		_offset += result.offset;
+		ends.push(_offset);
 		_state = result.state;
 		parsed.push(result.result);
 	} while (result && !result.result.tactic.spec.footer.structure);
@@ -76,6 +79,7 @@ export function parse_cnl_chained(value: string, state: string[] = []): CNLParse
 		result: parsed,
 		state: _state,
 		offset: _offset,
+		ends,
 		action: parsed[parsed.length - 1]?.tactic?.spec?.footer?.structure?.specification
 	};
 }

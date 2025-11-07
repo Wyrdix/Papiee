@@ -54,6 +54,9 @@ export const marks = {
 			},
 			error: {
 				default: false
+			},
+			last: {
+				default: false
 			}
 		}
 	}
