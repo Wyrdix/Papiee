@@ -13,6 +13,9 @@
 	import '$lib/resolvedpos';
 	import { MathLiveNodeView } from '$lib/prosemirror-papiee-cnl/mathlive_inputview';
 	import { MarkSelectedView, plugins as mark_selected_plugins } from './marks/MarkSelected.svelte';
+	import { plugins as mark_tactic_plugins, MarkTacticView } from './marks/MarkTactic.svelte';
+
+	import '$lib/cnl/tactics';
 
 	let { node = $bindable(), onView }: { node?: Node; onView?: (view: EditorView) => void } =
 		$props();
@@ -39,6 +42,7 @@
 				line_plugins,
 				content_plugins,
 				mark_selected_plugins,
+				mark_tactic_plugins,
 				// Prevent selection from spanning multiple elements
 				new Plugin({
 					filterTransaction(tr, state) {
@@ -53,8 +57,7 @@
 						return sel_start.pos === from.pos && sel_end.pos === to.pos;
 					}
 				})
-			].flat(),
-			doc: node
+			].flat()
 		});
 		const editorView = new EditorView(element, {
 			state: editor_state,
@@ -68,7 +71,8 @@
 				}
 			},
 			markViews: {
-				selected: MarkSelectedView(markViewFactor)
+				selected: MarkSelectedView(markViewFactor),
+				tactic: MarkTacticView(markViewFactor)
 			},
 			attributes(state) {
 				return { spellcheck: 'false' };

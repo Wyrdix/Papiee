@@ -14,7 +14,7 @@
 	const contentRef = useNodeViewContext('contentRef');
 </script>
 
-<div class="line min-h-4 py-1" use:contentRef></div>
+<div class="line min-h-4 py-3" use:contentRef></div>
 
 <style>
 	.line {

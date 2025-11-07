@@ -41,9 +41,13 @@
 		position: absolute;
 		inset: -5px;
 		border-radius: 4px;
-		border: 1px rgba(0, 0, 255, 0.4);
+		border: 2px rgba(0, 0, 255, 0.4);
 		pointer-events: none;
 		border-style: solid;
 		z-index: 1; /* sits behind the text */
+	}
+
+	:global(.mark-selected .mark-tactic::before) {
+		border: none !important;
 	}
 </style>

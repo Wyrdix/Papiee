@@ -1,3 +1,4 @@
+import type { ParseResult } from '$lib/cnl/cnl_grammar';
 import * as mathlive from 'mathlive';
 import { Schema, type MarkSpec, type NodeSpec } from 'prosemirror-model';
 
@@ -67,7 +68,17 @@ export const nodes = {
 } satisfies { [key: string]: NodeSpec };
 
 export const marks = {
-	selected: {}
+	selected: {},
+	tactic: {
+		attrs: {
+			tactic: {
+				default: undefined as ParseResult | undefined
+			},
+			error: {
+				default: false
+			}
+		}
+	}
 } satisfies { [key: string]: MarkSpec };
 
 export const schema = new Schema({ nodes, marks });

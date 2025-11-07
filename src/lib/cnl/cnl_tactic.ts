@@ -3,7 +3,6 @@ import { attach_grammar } from './cnl_tactic_to_grammar';
 import nearley from 'nearley';
 import rules, { type Specification, type StateAction } from './cnl_tactic_specifier';
 import type { ParseError } from '$lib/parsing';
-import tactic_grammar, { type ParseResult } from './cnl_grammar';
 
 const { Grammar, Parser } = nearley;
 const grammar = Grammar.fromCompiled(rules);
@@ -67,7 +66,10 @@ export function createTacticFromTextual<T = any>(
 	const spec = fromStringToSpecification(textual.trim());
 
 	if ('name' in spec) {
-		throw spec;
+		console.error('Error while parsing rule', name);
+		throw new Error(
+			'Error while parsing rule ' + textual + (name ? '(' + name + ')' : '') + '\n' + spec.message
+		);
 	}
 
 	const cnl: CnlTactic = {
