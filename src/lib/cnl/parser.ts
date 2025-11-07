@@ -26,6 +26,18 @@ export function parse_cnl(value: string, state?: string[]): CNLParseResult | und
 	const parser = new Parser(grammar);
 
 	let max: CNLParseResult | undefined = undefined;
+
+	parser.feed([]);
+	const results = parser.results as { state: string[]; result: ParseResult }[];
+	if (results && results.length !== 0) {
+		const { state, result } = results[0];
+		max = {
+			offset: 0,
+			result,
+			state
+		};
+	}
+
 	for (let i = 0; i < value.length; i++) {
 		try {
 			parser.feed(value[i]);
@@ -34,7 +46,7 @@ export function parse_cnl(value: string, state?: string[]): CNLParseResult | und
 		}
 
 		const results = parser.results as { state: string[]; result: ParseResult }[];
-		if (results.length === 0) continue;
+		if (results?.length === 0) continue;
 		const { state, result } = results[0];
 		max = {
 			offset: i + 1,
