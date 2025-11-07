@@ -1,5 +1,5 @@
 import type { CompiledRules, ParserRule } from 'nearley';
-import { getTactics, type CnlTactic } from './cnl_tactic';
+import { getTactics, resolve_state_actions, type CnlTactic } from './cnl_tactic';
 import { filterToName } from './cnl_tactic_to_grammar';
 import { Lexer } from './lexer';
 
@@ -45,9 +45,7 @@ export default function tactic_grammar(tactics?: CnlTactic[], state?: string[]):
 					let _state = [...state];
 					const cnl_tactic = d[0] as { tactic: CnlTactic; value: unknown };
 
-					const { pop, push } = cnl_tactic.tactic.spec;
-					_state = _state.slice(0, _state.length - pop);
-					_state = [..._state, ...push];
+					_state = resolve_state_actions(_state, cnl_tactic.tactic.spec.footer.actions);
 
 					return { result: cnl_tactic, state: _state };
 				}

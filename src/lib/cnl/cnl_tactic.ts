@@ -1,7 +1,7 @@
 import type { CompiledRules } from 'nearley';
 import { attach_grammar } from './cnl_tactic_to_grammar';
 import nearley from 'nearley';
-import rules, { type Specification } from './cnl_tactic_specifier';
+import rules, { type Specification, type StateAction } from './cnl_tactic_specifier';
 import type { ParseError } from '$lib/parsing';
 import tactic_grammar, { type ParseResult } from './cnl_grammar';
 
@@ -27,6 +27,25 @@ export type CnlTactic<T = any> = {
 	grammar?: CompiledRules;
 	transformer: Transformer<T>;
 };
+
+export function resolve_state_actions(state: string[], actions: StateAction[]) {
+	const _state = [...state];
+
+	actions.forEach((action) => {
+		switch (action.action) {
+			case 'pop': {
+				_state.pop();
+				break;
+			}
+			case 'push': {
+				_state.push(action.value);
+				break;
+			}
+		}
+	});
+
+	return _state;
+}
 
 const registry: CnlTactic[] = [];
 

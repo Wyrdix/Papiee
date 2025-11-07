@@ -1,17 +1,7 @@
 import type { CompiledRules, Grammar, ParserRule, Symbol } from 'nearley';
-import type {
-	Specification,
-	EndAction,
-	Proposition,
-	Reference,
-	RepeatingPropositionRule,
-	Sentence,
-	SentenceNode,
-	SpecificationNode,
-	Text
-} from './cnl_tactic_specifier';
 import type { CnlTactic } from './cnl_tactic';
 import { Lexer } from './lexer';
+import type { Reference, SpecificationContentNode, Text } from './cnl_tactic_specifier';
 
 export function filterToName(filter?: string): string {
 	if (!filter) return `FILTER_DEFAULT`;
@@ -91,7 +81,7 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 
 	const spec = tactic.spec;
 
-	function specification_node(v: SpecificationNode): [string, ParserRule[]] {
+	function specification_node(v: SpecificationContentNode): [string, ParserRule[]] {
 		switch (v.type) {
 			case 'text':
 				return text(v);
@@ -100,40 +90,6 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 			default:
 				throw new Error(`${v as any} is unknown`);
 		}
-	}
-
-	function sentence_node(v: SentenceNode): [string, ParserRule[]] {
-		switch (v.type) {
-			case 'proposition':
-				return proposition(v);
-			case 'repeating_proposition_rule':
-				return repeating_proposition_rule(v);
-			default:
-				throw new Error(`${v as any} is unknown`);
-		}
-	}
-
-	function proposition(v: Proposition): [string, ParserRule[]] {
-		const id = generate();
-		const specifications = v.value.map(specification_node);
-
-		return [
-			id,
-			[
-				...specifications.flatMap((v) => v[1]),
-				{
-					name: id,
-					symbols: specifications
-						.map((v, i) =>
-							[v[0] satisfies Symbol].concat(i < specifications.length - 2 ? [_space_1_id] : [])
-						)
-						.flat(),
-					postprocess(d, loc, reject) {
-						return d.slice(1, d.length - 1);
-					}
-				}
-			]
-		];
 	}
 
 	function text(v: Text): [string, ParserRule[]] {
@@ -159,9 +115,9 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 	}
 
 	function reference(v: Reference): [string, ParserRule[]] {
-		const id = generate() + '_' + v.reference + '#REF' + v.reference;
-		if (reference_value_type.has(v.reference)) reference_value_type.set(v.reference, 'list');
-		else reference_value_type.set(v.reference, 'unique');
+		const id = generate() + '_' + v.value + '#REF' + v.value;
+		if (reference_value_type.has(v.value)) reference_value_type.set(v.value, 'list');
+		else reference_value_type.set(v.value, 'unique');
 
 		return [
 			id,
@@ -171,7 +127,7 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 					symbols: [_everything],
 					postprocess(d, loc, reject) {
 						return {
-							type: v.reference,
+							type: v.value,
 							value: d[0]
 						};
 					},
@@ -181,55 +137,12 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 		];
 	}
 
-	function sentence(v: Sentence): [string, ParserRule[]] {
-		const id = generate();
-		const specifications = v.value.map(sentence_node);
-
-		return [
-			id,
-			[
-				...specifications.flatMap((v) => v[1]),
-				{
-					name: id,
-					symbols: specifications.map((v) => v[0]),
-					postprocess(d, loc, reject) {
-						return d;
-					}
-				}
-			]
-		];
-	}
-
-	function repeating_proposition_rule(v: RepeatingPropositionRule): [string, ParserRule[]] {
-		const id = generate();
-
-		const keys = Array(...reference_value_type.keys());
-		const main_propositions = v.value.map(sentence_node);
-
-		// Reference inside main node can appear multiple time even though reference node is unique
-		const after_keys = Array(...reference_value_type.keys());
-		after_keys.filter((k) => !keys.includes(k)).forEach((k) => reference_value_type.set(k, 'list'));
-
-		const ending_propositions = v.last_repetition ? v.last_repetition.map(sentence_node) : [];
-
-		return [
-			id,
-			main_propositions
-				.concat(ending_propositions)
-				.flatMap((v) => v[1])
-				.concat([
-					{ name: id, symbols: ending_propositions.map((v) => v[0]) },
-					{ name: id, symbols: main_propositions.map((v) => v[0]).concat(id) }
-				])
-		];
-	}
-
-	const compiled_sentence = spec.value ? spec.value.map(sentence) : [];
+	const compiled_content = spec.content.map((v) => specification_node(v));
 
 	const main_rule: ParserRule[] = [
 		{
-			name: filterToName(spec.filter),
-			symbols: compiled_sentence.map((v) => v[0]),
+			name: filterToName(spec.header.state),
+			symbols: compiled_content.map((v) => v[0]),
 			postprocess(v) {
 				const references = v
 					.flat(Infinity)
@@ -256,12 +169,12 @@ export function attach_grammar(tactic: CnlTactic): CompiledRules {
 
 	const grammar = {
 		Lexer: new Lexer(),
-		ParserRules: compiled_sentence
+		ParserRules: compiled_content
 			.map((v) => v[1])
 			.flat()
 			.concat(...SPACE_0, ...SPACE_1, ...EVERYTHING)
 			.concat(main_rule),
-		ParserStart: filterToName(spec.filter)
+		ParserStart: filterToName(spec.header.state)
 	};
 	tactic.grammar = grammar;
 

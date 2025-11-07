@@ -1,132 +1,113 @@
 @preprocessor typescript
 @{%
-
-export interface Text {
-	type: 'text';
-	value: string;
-}
-
-export interface Reference {
-	type: 'reference';
-	reference: string;
-}
-
-export type SpecificationNode = Text | Reference;
-export type SentenceNode = Proposition | RepeatingPropositionRule;
-
-export interface Proposition {
-	type: 'proposition';
-	value: SpecificationNode[];
-}
-
-export interface Sentence {
-	type: 'sentence';
-	value: SentenceNode[];
-}
-
-export interface RepeatingPropositionRule {
-	type: 'repeating_proposition_rule';
-	value: SentenceNode[];
-	last_repetition?: SentenceNode[] ;
-}
-
-export interface Specification {
+export type Specification = {
 	type: 'specification';
-	filter?: string;
-	pop: number;
-	push: string[];
-	value?: Sentence[];
-	terminal: boolean;
+	header: SpecificationHeader;
+	content: SpecificationContent;
+	footer: SpecificationFooter;
+};
+export type SpecificationHeader = { type: 'header'; state?: string };
+export type SpecificationFooter = {
+	type: 'footer';
+	structure?: StructureSpecification;
+	actions: StateAction[];
+};
+
+export type SpecificationContent = SpecificationContentNode[];
+export type SpecificationContentNode = Reference | Text;
+export type Reference = { type: 'reference'; value: string };
+export type Text = { type: 'text'; value: string };
+
+export type StateAction = StateActionPop | StateActionPush;
+export type StateActionPop = { type: 'state_action'; action: 'pop' };
+export type StateActionPush = { type: 'state_action'; action: 'push'; value: string };
+
+export type StructureSpecification =
+	| StructureSpecificationEndOfLine
+	| StructureSpecificationEndOfParagraph
+	| StructureSpecificationBeginOfParagraph;
+
+export type StructureSpecificationEndOfLine = {
+	type: 'footer_structure_action';
+	specification: 'end_of_line';
+};
+
+export type StructureSpecificationEndOfParagraph = {
+	type: 'footer_structure_action';
+	specification: 'end_of_paragraph';
+};
+
+export type StructureSpecificationBeginOfParagraph = {
+	type: 'footer_structure_action';
+	specification: 'begin_of_paragraph';
+};
+
+function specification(
+	_header: SpecificationHeader,
+	content: SpecificationContent,
+	_footer: SpecificationFooter
+): Specification {
+	return { type: 'specification', header: _header, content, footer: _footer };
 }
 
-export type EndAction =
-	| { type: 'end_action'; action: 'pop' }
-	| { type: 'end_action'; action: 'push'; value: string };
-
-function text(value: string | undefined): Text | undefined {
-	if (!value || value.trim().length === 0) return undefined;
+function text(value: string): Text {
 	return { type: 'text', value };
 }
 
-function proposition(value: SpecificationNode[]): Proposition {
-	return {
-		type: 'proposition',
-		value: value
-			.filter((v) => v)
-			.reduce(
-				(a, b): SpecificationNode[] => {
-					const last = a[a.length - 1];
-					if (last?.type === 'text' && b.type === 'text')
-						return [...a.slice(0, a.length - 1), text(last.value + b.value)!];
-					return [...a, b];
-				},
-				[{ type: 'text', value: '' } as SpecificationNode]
-			)
-	};
+function reference(value: string): Reference {
+	return { type: 'reference', value };
 }
 
-function sentence(value: SentenceNode[]): Sentence {
-	return { type: 'sentence', value };
+function header(state: string): SpecificationHeader {
+	return { type: 'header', state };
 }
 
-function repeating_proposition_rule(
-	value: SentenceNode[],
-	last_repetition: SentenceNode[]| undefined
-): RepeatingPropositionRule {
-	return { type: 'repeating_proposition_rule', value, last_repetition };
+function footer(
+	structure_specification: StructureSpecification,
+	state_actions: StateAction[]
+): SpecificationFooter {
+	return { type: 'footer', structure: structure_specification, actions: state_actions };
 }
 
-function concat_text(value: Text[]): Text {
-	return { type: 'text', value: value.map((v) => v.value).join(' ') };
+function pop(): StateActionPop {
+	return { type: 'state_action', action: 'pop' };
 }
 
-function action(value: ['-'] | ['+', Text]): EndAction {
-	return value.length === 1
-		? { type: 'end_action', action: 'pop' }
-		: { type: 'end_action', action: 'push', value: value[1].value };
+function push(value: string): StateActionPush {
+	return { type: 'state_action', action: 'push', value };
 }
 
-function specification(
-	filter: string | undefined,
-	value: Sentence[],
-	terminal: boolean,
-	end_action: EndAction[] | undefined
-): Specification {
-	value = value || [];
-	end_action = end_action || []
-	end_action = end_action.reduce((a: EndAction[], b) => {
-		if (a.length === 0) return [b];
-		if (a[a.length - 1].action === 'push' && b.action === 'pop') return a.slice(0, a.length - 1);
-		return [...a, b];
-	}, []);
+function footer_structure_specification_endofline(): StructureSpecificationEndOfLine {
+	return { type: 'footer_structure_action', specification: 'end_of_line' };
+}
 
-	let pop = end_action.filter(v=>v.action === "pop").length
-	let push = end_action.filter(v=>v.action === "push").map(v=>v.value);
+function footer_structure_specification_endofparagraph(): StructureSpecificationEndOfParagraph {
+	return { type: 'footer_structure_action', specification: 'end_of_paragraph' };
+}
 
-	return { type: 'specification', filter, value, pop, push, terminal };
+function footer_structure_specification_beginofparagraph(): StructureSpecificationBeginOfParagraph {
+	return { type: 'footer_structure_action', specification: 'begin_of_paragraph' };
 }
 %}
 
+main -> specification {% d => d[0] %}
 
-main -> "{" word:? "|" content "#":? "|" end_action:* "}" {% d => specification(d[1]?.value, d[3], d[4] == null, d[6] || undefined)%}
+specification -> "{" header "|" content "|" footer "}" {% d => specification(d[1], d[3], d[5]) %}
 
-end_action -> (("+" word)|"-") {% d => action(d.flat(Infinity) as any) %}
+header -> word:? {% d => header(d[0]) %}
+footer -> footer_structure_action footer_state_actions {% d => footer(d[0], d[1]) %}
 
-content -> sentence:+ {% d => d[0] %}
+footer_state_actions -> (footer_pop | footer_push):* {%d => d.flat()[0] || [] %}
+footer_pop -> "-" {% d => pop() %}
+footer_push -> "+" word {% d => push(d[1]) %}
 
-proposition[SEP] -> (text:? _ (reference)):* text:? _ $SEP _ {% d => proposition(d.slice(undefined, 4).flat(Infinity)) %}
-sentence -> (proposition[end_of_proposition] | repeating_proposition_rule):* (proposition[end_of_sentence] |repeating_proposition_rule) {% d => sentence([...d[0].map((v:any)=>v[0]), ...d[1]])%}
-repeating_proposition_rule -> "@repeat(" _ sentence _ ")" {% d => repeating_proposition_rule(d[2].value, undefined) %}
-	| "@repeat(" _ proposition[end_of_proposition]:* _ ")(" _ proposition[end_of_sentence] _ ")" {% d => repeating_proposition_rule(d[2], [d[6]]) %}
-	| "@repeat(" _ sentence _ ")(" _ sentence _ ")" {% d => repeating_proposition_rule(d[2].value, d[6].value) %}
+footer_structure_action -> (footer_endofline | footer_beginparagraph | footer_endparagraph):? {% d=>d.flat()[0] %}
+footer_endofline -> "#" {% d => footer_structure_specification_endofline() %}
+footer_beginparagraph -> ">" {% d => footer_structure_specification_beginofparagraph() %}
+footer_endparagraph -> "<" {% d => footer_structure_specification_endofparagraph() %}
 
-end_of_proposition -> (",") {% d => text(d.flat()[0]) %}
-end_of_sentence -> ("." | ":") {% d => text(d.flat()[0]) %}
 
-text -> word (__ word):* {% d => concat_text(d.flat(Infinity).filter(Boolean)) %}
-word -> [^\s\.,:|@\(\)]:+ {% d => text(d[0].join("")) %}
-
-reference -> "|" [a-zA-Z0-9]:+ "|" {% d => ({type: "reference", reference: d[1].join("")}) %}
-
-_ -> [ \t\n]:* {% d => text(d[0].join("")) %}
-__ -> [ \t\n]:+ {% d => text(d[0].join("")) %}
+content -> text:? (reference text):* reference:? {% d => d.flat(Infinity).filter(Boolean) %}
+text -> ([^|] | "\\|"):+ {% d => text(d[0].map((v: string)=>v[0] === "\\|" ? "|" : v[0]).join("")) %}
+reference -> "|" word "|" {% d => reference(d[1]) %}
+word -> [a-zA-Z0-9_]:+ {% d => d[0].join("") %}
