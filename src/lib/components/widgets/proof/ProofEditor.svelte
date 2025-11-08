@@ -14,6 +14,9 @@
 	import { schema } from '$lib/components/widgets/proof/schema';
 
 	import '$lib/cnl/tactics';
+	import type { CompletionState } from './ProofAutoCompletion.svelte';
+	import ProofAutoCompletion from './ProofAutoCompletion.svelte';
+	import { setContext } from 'svelte';
 
 	let { node = $bindable(), onView }: { node?: Node; onView?: (view: EditorView) => void } =
 		$props();
@@ -21,10 +24,14 @@
 	const nodeViewFactory = useNodeViewFactory();
 	const markViewFactor = useMarkViewFactory();
 
+	let view: EditorView | undefined = $state();
+
 	const editor = (element: HTMLElement) => {
 		const editor_state = EditorState.create({
 			schema,
 			plugins: [
+				mark_selected_plugins,
+				mark_tactic_plugins,
 				new Plugin({
 					view(view) {
 						return {
@@ -38,8 +45,6 @@
 				doc_plugins,
 				line_plugins,
 				content_plugins,
-				mark_selected_plugins,
-				mark_tactic_plugins,
 				// Prevent selection from spanning multiple elements
 				new Plugin({
 					filterTransaction(tr, state) {
@@ -52,11 +57,24 @@
 						const sel_end = end.min(to);
 
 						return sel_start.pos === from.pos && sel_end.pos === to.pos;
+					},
+					view(view) {
+						return {
+							update(view, prevState) {
+								view.state.doc.descendants((node, pos, parent) => {
+									const selected = node.marks.find(
+										(v) => v.type.name === schema.marks.selected.name
+									);
+									if (!selected) return true;
+									completion = selected.attrs.completion as CompletionState | undefined;
+								});
+							}
+						};
 					}
 				})
 			].flat()
 		});
-		const editorView = new EditorView(element, {
+		view = new EditorView(element, {
 			state: editor_state,
 			nodeViews: {
 				paragraph: ParagraphNodeView(nodeViewFactory),
@@ -68,6 +86,7 @@
 				selected: MarkSelectedView(markViewFactor),
 				tactic: MarkTacticView(markViewFactor)
 			},
+
 			attributes(state) {
 				return { spellcheck: 'false' };
 			},
@@ -81,16 +100,19 @@
 		});
 
 		$effect(() => {
-			if (node && unparse(node) !== unparse(editorView.state.doc)) {
-				editorView.dispatch(
-					editorView.state.tr.replaceRangeWith(0, editorView.state.doc.content.size - 1, node)
-				);
+			if (node && unparse(node) !== unparse(view!.state.doc)) {
+				view!.dispatch(view!.state.tr.replaceRangeWith(0, view!.state.doc.content.size - 1, node));
 			}
 		});
-		if (onView) onView(editorView);
+		if (onView) onView(view);
 	};
+
+	let completion: CompletionState | undefined = $state();
 </script>
 
+{#if view}
+	<ProofAutoCompletion {view} {completion} />
+{/if}
 <div class="ProseMirror" use:editor></div>
 
 <style>
