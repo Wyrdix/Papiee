@@ -42,7 +42,8 @@
 	.mark-chunks {
 		position: relative;
 		display: inline-block;
-		margin-left: 4px;
+		margin-left: 20px;
+		margin-right: 0px;
 	}
 
 	:global(.mark-chunks[data-type='tactic']) {

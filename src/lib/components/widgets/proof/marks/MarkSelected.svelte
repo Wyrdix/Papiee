@@ -192,8 +192,7 @@
 </script>
 
 <span class="relative">
-	<span class="mark-selected" use:contentRef></span>
-	<span class="completer_position"></span>
+	<span class="mark-selected" use:contentRef></span><span class="completer_position"></span>
 </span>
 
 <style>
