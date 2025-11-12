@@ -94,7 +94,7 @@ main -> specification {% d => d[0] %}
 
 specification -> "{" header "|" content "|" footer "}" {% d => specification(d[1], d[3], d[5]) %}
 
-header -> word:? {% d => header(d[0]) %}
+header -> (word | "*"):? {% d => header(d.flat().filter(Boolean)[0]) %}
 footer -> footer_structure_action footer_state_actions {% d => footer(d[0], d[1]) %}
 
 footer_state_actions -> (footer_pop | footer_push):* {%d => d[0].flat(Infinity) %}

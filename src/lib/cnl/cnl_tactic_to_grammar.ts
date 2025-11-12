@@ -4,6 +4,7 @@ import { Lexer } from './lexer';
 import type { Reference, SpecificationContentNode, Text } from './cnl_tactic_specifier';
 
 export function filterToName(filter?: string): string {
+	if (filter === '*') return 'ANYTHING';
 	if (!filter) return `FILTER_DEFAULT`;
 	return `FILTER_${filter.toUpperCase()}`;
 }

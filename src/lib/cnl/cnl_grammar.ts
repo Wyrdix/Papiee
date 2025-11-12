@@ -38,17 +38,32 @@ export default function tactic_grammar(tactics?: CnlTactic[], state?: string[]):
 		Lexer: new Lexer(),
 		ParserRules: sources
 			.flatMap((v) => v.ParserRules)
-			.concat({
-				name: 'main',
-				symbols: [state.length === 0 ? filterToName() : filterToName(state[state.length - 1])],
-				postprocess(d) {
-					let _state = [...state];
-					const cnl_tactic = d[0] as { tactic: CnlTactic; value: unknown };
+			.concat(
+				{
+					name: 'main',
+					symbols: [state.length === 0 ? filterToName() : filterToName(state[state.length - 1])],
+					postprocess(d) {
+						let _state = [...state];
+						const cnl_tactic = d[0] as { tactic: CnlTactic; value: unknown };
 
-					_state = resolve_state_actions(_state, cnl_tactic.tactic.spec.footer.actions);
+						_state = resolve_state_actions(_state, cnl_tactic.tactic.spec.footer.actions);
 
-					return { result: cnl_tactic, state: _state };
+						return { result: cnl_tactic, state: _state };
+					}
+				},
+				{
+					name: 'main',
+					symbols: [filterToName('*')],
+					postprocess(d) {
+						let _state = [...state];
+						const cnl_tactic = d[0] as { tactic: CnlTactic; value: unknown };
+						console.log('Hhahahah');
+
+						_state = resolve_state_actions(_state, cnl_tactic.tactic.spec.footer.actions);
+
+						return { result: cnl_tactic, state: _state };
+					}
 				}
-			})
+			)
 	};
 }
