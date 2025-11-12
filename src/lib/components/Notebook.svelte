@@ -5,7 +5,8 @@
 	import NotebookAddMenu from './NotebookAddMenu.svelte';
 	import RocqProvider from './RocqProvider.svelte';
 
-	let notebook_state: NotebookState = $state([PROOF_WIDGET.initial()]);
+	let { notebook_state = $bindable([]) }: { notebook_state?: NotebookState } = $props();
+
 	let anchor: HTMLElement | undefined = $state();
 	let anchored_i: number = $state(-1);
 

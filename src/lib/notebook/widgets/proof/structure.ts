@@ -21,7 +21,7 @@ export const PROOF_WIDGET: ProofWidget = {
 	initial() {
 		return {
 			type: 'proof',
-			value: 'Let $x$.\ntest',
+			value: '',
 			position: undefined
 		};
 	},
@@ -32,9 +32,9 @@ export const PROOF_WIDGET: ProofWidget = {
 	},
 	untrim(trimmed) {
 		return {
-			type: 'markdown',
-			position: 0,
-			value: trimmed.value
+			type: 'proof',
+			value: trimmed.value,
+			position: 0
 		};
 	},
 	get(value) {
