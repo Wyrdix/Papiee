@@ -49,7 +49,7 @@ export function parse_cnl(value: string, state?: string[]): CNLParseResult | und
 		const results = parser.results as { state: string[]; result: ParseResult }[];
 		if (results?.length === 0) continue;
 		const { state, result } = results[0];
-		max = {
+		return {
 			offset: i + 1,
 			result,
 			state
