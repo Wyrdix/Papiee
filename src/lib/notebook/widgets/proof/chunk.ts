@@ -261,7 +261,21 @@ export function command_parsechunk(state: EditorState, dispatch?: (tr: Transacti
 
 	chunks.chunks.forEach((chunk) => {
 		let { from, to } = chunk.range;
-		if (from === to) {
+		let node = undefined as Node | undefined;
+		if (from === to) node = undefined;
+		else {
+			const nodes: Node[] = [];
+			tr.doc.nodesBetween(from, to, (node) => {
+				if (node.type.name !== schema.nodes.text.name) return;
+				nodes.push(node);
+			});
+			if (nodes.length > 1) {
+				throw new Error('Chunk span on multiple nodes');
+			}
+			node = nodes[0];
+		}
+
+		if (!node) {
 			let newfrom = tr.doc.resolve(from);
 
 			while (newfrom.node().type.name !== 'line' && newfrom.pos > 0) {
@@ -272,20 +286,19 @@ export function command_parsechunk(state: EditorState, dispatch?: (tr: Transacti
 
 			from = newfrom.pos;
 			to = newto.pos;
+
+			const nodes: Node[] = [];
+			tr.doc.nodesBetween(from, to, (node) => {
+				if (node.type.name !== schema.nodes.text.name) return;
+				nodes.push(node);
+			});
+			if (nodes.length > 1) {
+				throw new Error('Chunk span on multiple nodes');
+			}
+			node = nodes[0];
 		}
 
-		const nodes: Node[] = [];
-		tr.doc.nodesBetween(from, to, (node) => {
-			if (node.type.name !== schema.nodes.text.name) return;
-			nodes.push(node);
-		});
-		if (nodes.length > 1) {
-			throw new Error('Chunk span on multiple nodes');
-		}
-		const node = nodes[0];
-		if (!node) {
-			throw new Error('No node under the range ' + String(from) + ' ' + String(to));
-		}
+		if (!node) throw new Error('No node under the range ' + String(from) + ' ' + String(to));
 
 		const existing =
 			(node.marks.find((v) => v.type.name === schema.marks.chunks.name)?.attrs?.value as

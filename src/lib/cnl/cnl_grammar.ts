@@ -57,7 +57,6 @@ export default function tactic_grammar(tactics?: CnlTactic[], state?: string[]):
 					postprocess(d) {
 						let _state = [...state];
 						const cnl_tactic = d[0] as { tactic: CnlTactic; value: unknown };
-						console.log('Hhahahah');
 
 						_state = resolve_state_actions(_state, cnl_tactic.tactic.spec.footer.actions);
 
