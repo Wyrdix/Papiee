@@ -8,7 +8,8 @@
 	let {
 		value,
 		onNodeValueUpdate,
-		setAnchorNode: _setAnchorNode
+		setAnchorNode: _setAnchorNode,
+		isAnchored
 	}: WidgetProps<QuestionWidgetValue> = $props();
 
 	function setAnchorNode() {
@@ -21,6 +22,7 @@
 <div bind:this={div} class="flex flex-col gap-5">
 	<MarkdownWidget
 		{setAnchorNode}
+		{isAnchored}
 		value={{
 			type: 'markdown',
 			...value.markdown_header,
@@ -40,6 +42,7 @@
 
 	<RocqWidget
 		{setAnchorNode}
+		{isAnchored}
 		value={{
 			type: 'rocq',
 			...value.rocq_header,
@@ -59,6 +62,7 @@
 
 	<ProofWidget
 		{setAnchorNode}
+		{isAnchored}
 		value={{
 			type: 'proof',
 			...value.cnl_proof,

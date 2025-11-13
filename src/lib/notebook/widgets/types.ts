@@ -62,4 +62,9 @@ export type WidgetProps<Value extends WidgetValue = WidgetValue> = {
 	 * @returns
 	 */
 	onNodeValueUpdate: (old_value: Value, new_value: Value) => void;
+	/**
+	 * Enable widgets to behave differently if they are the currently anchored widget
+	 * @returns
+	 */
+	isAnchored: () => boolean;
 };

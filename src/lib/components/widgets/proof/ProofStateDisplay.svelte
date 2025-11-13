@@ -9,7 +9,8 @@
 	import type { Attachment } from 'svelte/attachments';
 	import Draggable from '$lib/components/Draggable.svelte';
 
-	let { chunks, position }: { chunks: ProofChunk[]; position: number } = $props();
+	let { chunks, position, hide }: { chunks: ProofChunk[]; position: number; hide?: boolean } =
+		$props();
 
 	const code = $derived(
 		chunks
@@ -48,7 +49,6 @@
 		let languageId = 'rocq';
 		let version = 1;
 		let text = 'Lemma test: forall (x: nat), True.\nProof.\n' + code;
-		console.log(text);
 		let textDocument = types.TextDocumentItem.create(uri, languageId, version, text);
 		let openParams: proto.DidOpenTextDocumentParams = { textDocument };
 		connection.sendNotification(proto.DidOpenTextDocumentNotification.type, openParams).then(() =>
@@ -66,35 +66,31 @@
 		);
 	});
 
-	$inspect(rocq_state);
-
 	let draggable: Draggable | undefined = $state(undefined);
 
 	let goals = $derived(rocq_state?.goals);
 	let goal = $derived(goals?.goals[0]);
 
 	let hyps = $derived(goal?.hyps);
-
-	$effect(() => {
-		// untrack(() => draggable)?.refresh();
-	});
 </script>
 
 <Draggable bind:this={draggable}>
-	<div class="b-1 flex h-full w-full flex-col rounded-md bg-white text-nowrap text-black shadow-lg">
-		<div class="min-w-20 rounded-t-md border-surface-600-400 bg-surface-600-400">
-			<h4 class="mx-auto my-0 w-fit">Goal</h4>
-		</div>
-		<div class="p-2">
-			<ul>
-				{#each hyps as h}
-					<li>
-						{h.names.join(',')} : {h.ty}
-					</li>
-				{/each}
-			</ul>
+	{#if hide !== true}
+		<div class="b-1 rounded-mdtext-nowrap flex h-full w-full flex-col text-black shadow-lg">
+			<div class="min-w-20 rounded-t-md border-surface-600-400 bg-surface-600-400">
+				<h4 class="mx-auto my-0 w-fit">Goal</h4>
+			</div>
+			<div class="bg-white p-2">
+				<ul>
+					{#each hyps as h}
+						<li>
+							{h.names.join(',')} : {h.ty}
+						</li>
+					{/each}
+				</ul>
 
-			<h4>{goal?.ty}</h4>
+				<h4>{goal?.ty}</h4>
+			</div>
 		</div>
-	</div>
+	{/if}
 </Draggable>

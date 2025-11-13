@@ -42,6 +42,7 @@
 					onNodeValueUpdate={(_, new_v) => {
 						notebook_state[i] = new_v;
 					}}
+					isAnchored={() => anchored_i === i}
 				/>
 			{/each}
 		</div>

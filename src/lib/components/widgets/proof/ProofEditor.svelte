@@ -24,8 +24,11 @@
 	} from '$lib/notebook/widgets/proof/chunk';
 	import ProofStateDisplay from './ProofStateDisplay.svelte';
 
-	let { node = $bindable(), onView }: { node?: Node; onView?: (view: EditorView) => void } =
-		$props();
+	let {
+		node = $bindable(),
+		onView,
+		display_goal
+	}: { node?: Node; onView?: (view: EditorView) => void; display_goal: boolean } = $props();
 
 	const nodeViewFactory = useNodeViewFactory();
 	const markViewFactor = useMarkViewFactory();
@@ -128,7 +131,7 @@
 
 {#if view}
 	<ProofAutoCompletion {view} {completion} />
-	<ProofStateDisplay {chunks} position={selected} />
+	<ProofStateDisplay {chunks} position={selected} hide={!display_goal} />
 {/if}
 <div class="ProseMirror" use:editor></div>
 
