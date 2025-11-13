@@ -1,2 +1,2 @@
-Lemma Simple_Lemma : True.
+Lemma Simple_Lemma : forall(n:nat), True.
 Proof. reflexivity. Qed.
