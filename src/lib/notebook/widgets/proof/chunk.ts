@@ -116,8 +116,9 @@ export function parsechunks(root: Node): { state: string[]; chunks: ProofChunk[]
 		let after_content_pos = prev_pos;
 
 		let paragraph_stop = false;
+		if (content?.children) after_content_pos++;
 		content?.children?.forEach((node) => {
-			let result = visitParagraph(after_content_state, node, after_content_pos);
+			let result = visitParagraph(after_content_state, node, after_content_pos + 1);
 			after_content_pos = result.pos;
 			if (paragraph_stop) {
 				chunks1 = chunks1.concat(turnToErroChunks(result.chunks));
