@@ -1,16 +1,19 @@
 <script lang="ts">
 	import type { ProofChunk } from '$lib/notebook/widgets/proof/chunk';
 	import { WORKER_CONTEXT, type RocqWorker } from '$lib/rocq/connection';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import type { Position } from 'vscode-languageserver-types';
 	import * as proto from 'vscode-languageserver-protocol';
 	import * as types from 'vscode-languageserver-types';
 	import type { GoalAnswer } from '$lib/rocq/type';
+	import type { Attachment } from 'svelte/attachments';
+	import Draggable from '$lib/components/Draggable.svelte';
 
 	let { chunks, position }: { chunks: ProofChunk[]; position: number } = $props();
 
 	const code = $derived(
 		chunks
+			.slice(0, position + 1)
 			.filter((v) => v.type === 'tactic')
 			.map((v) => v.code)
 			.join('')
@@ -31,9 +34,10 @@
 		};
 	});
 
-	const { connection } = getContext<RocqWorker>(WORKER_CONTEXT);
+	const worker = getContext<RocqWorker>(WORKER_CONTEXT);
+	const connection = $derived(worker.connection);
 
-	let state: GoalAnswer<string, string> | undefined = $state();
+	let rocq_state: GoalAnswer<string, string> | undefined = $state();
 	$effect(() => {
 		if (!connection) {
 			return undefined;
@@ -43,18 +47,54 @@
 		let uri = 'file:///exercise/main.v';
 		let languageId = 'rocq';
 		let version = 1;
-		let text = code;
+		let text = 'Lemma test: forall (x: nat), True.\nProof.\n' + code;
+		console.log(text);
 		let textDocument = types.TextDocumentItem.create(uri, languageId, version, text);
 		let openParams: proto.DidOpenTextDocumentParams = { textDocument };
 		connection.sendNotification(proto.DidOpenTextDocumentNotification.type, openParams).then(() =>
 			connection
 				.sendRequest('proof/goals', {
 					textDocument: { uri, version } satisfies proto.VersionedTextDocumentIdentifier,
-					position: rocq_position satisfies Position,
+					position: {
+						character: rocq_position.character,
+						line: rocq_position.line + 2
+					} satisfies Position,
 					pp_format: 'String',
 					mode: 'After'
 				})
-				.then((v) => (state = v as GoalAnswer<string, string>))
+				.then((v) => (rocq_state = v as GoalAnswer<string, string>))
 		);
 	});
+
+	$inspect(rocq_state);
+
+	let draggable: Draggable | undefined = $state(undefined);
+
+	let goals = $derived(rocq_state?.goals);
+	let goal = $derived(goals?.goals[0]);
+
+	let hyps = $derived(goal?.hyps);
+
+	$effect(() => {
+		// untrack(() => draggable)?.refresh();
+	});
 </script>
+
+<Draggable bind:this={draggable}>
+	<div class="b-1 flex h-full w-full flex-col rounded-md bg-white text-nowrap text-black shadow-lg">
+		<div class="min-w-20 rounded-t-md border-surface-600-400 bg-surface-600-400">
+			<h4 class="mx-auto my-0 w-fit">Goal</h4>
+		</div>
+		<div class="p-2">
+			<ul>
+				{#each hyps as h}
+					<li>
+						{h.names.join(',')} : {h.ty}
+					</li>
+				{/each}
+			</ul>
+
+			<h4>{goal?.ty}</h4>
+		</div>
+	</div>
+</Draggable>
