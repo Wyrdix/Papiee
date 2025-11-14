@@ -1,0 +1,21 @@
+name: Node.js CI
+
+on:
+  label:
+    types:
+      - created
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - run: npm ci
+      - run: npm run build
