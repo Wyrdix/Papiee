@@ -45,6 +45,7 @@
 		"@fsegurai/codemirror-theme-basic-dark": "^6.2.2",
 		"@lucide/svelte": "^0.546.0",
 		"@prosemirror-adapter/svelte": "^0.4.6",
+		"@sveltejs/adapter-static": "^3.0.10",
 		"@types/markdown-it": "^14.1.2",
 		"codemirror": "^6.0.2",
 		"markdown-it": "^14.1.0",
