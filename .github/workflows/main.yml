@@ -1,30 +1,47 @@
-name: Node.js CI
+name: Deploy build to GitHub Pages
 
 on:
-  label:
-    types:
-      - created
   push:
-    branches:
-      - main
+    branches: ['main']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v2
         with:
           node-version: '24.x'
-      - run: ls
-      - run: pwd
-      - run: cd src && ls
-      - run: 'cd static && curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.TOKEN }}" -L -o worker_artifact.zip "https://api.github.com/repos/ejgallego/rocq-lsp/actions/artifacts/4518852242/zip"'
-      - run: ls
-      - run: pwd
-      - run: cd ../
-      - run: ls
-      - run: pwd
-      - run: npm ci
-      - run: npm run build
+      - name: Query worker url
+        run: 'cd static && curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.TOKEN }}" -L -o worker_artifact.zip "https://api.github.com/repos/ejgallego/rocq-lsp/actions/artifacts/4518852242/zip"'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build the code
+        run: npm run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: 'build'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
