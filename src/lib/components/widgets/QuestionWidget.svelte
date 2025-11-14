@@ -9,7 +9,8 @@
 		value,
 		onNodeValueUpdate,
 		setAnchorNode: _setAnchorNode,
-		isAnchored
+		isAnchored,
+		mode
 	}: WidgetProps<QuestionWidgetValue> = $props();
 
 	function setAnchorNode() {
@@ -23,6 +24,7 @@
 	<MarkdownWidget
 		{setAnchorNode}
 		{isAnchored}
+		{mode}
 		value={{
 			type: 'markdown',
 			...value.markdown_header,
@@ -43,6 +45,7 @@
 	<RocqWidget
 		{setAnchorNode}
 		{isAnchored}
+		{mode}
 		value={{
 			type: 'rocq',
 			...value.rocq_header,
@@ -63,6 +66,7 @@
 	<ProofWidget
 		{setAnchorNode}
 		{isAnchored}
+		{mode}
 		value={{
 			type: 'proof',
 			...value.cnl_proof,

@@ -67,4 +67,9 @@ export type WidgetProps<Value extends WidgetValue = WidgetValue> = {
 	 * @returns
 	 */
 	isAnchored: () => boolean;
+
+	/**
+	 * Enable widgets views to render differently if the document is being viewed by a teacher or a student
+	 */
+	mode: 'teacher' | 'student';
 };

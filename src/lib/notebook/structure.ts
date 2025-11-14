@@ -27,4 +27,7 @@ export function getWidget_unsafe(value: string) {
 	return REGISTRY[value as keyof RootWidgetMap]! as unknown as Widget;
 }
 
-export type NotebookState = WidgetValue[];
+export type NotebookState = {
+	title: string;
+	widgets: WidgetValue[];
+};

@@ -18,9 +18,9 @@
 
 	function addNode(widget: Widget) {
 		const new_node = widget.initial();
-		let unfocused = notebook_state.map((v) => widget.moveTo(v, undefined));
+		let unfocused = notebook_state.widgets.map((v) => widget.moveTo(v, undefined));
 
-		notebook_state = [
+		notebook_state.widgets = [
 			...unfocused.slice(0, anchored_i + 1),
 			new_node,
 			...unfocused.slice(anchored_i + 1)
@@ -30,7 +30,7 @@
 
 		setTimeout(() => {
 			const begin = widget.getBegin(new_node);
-			notebook_state[i] = widget.moveTo(new_node, begin);
+			notebook_state.widgets[i] = widget.moveTo(new_node, begin);
 		}, 20);
 	}
 </script>
