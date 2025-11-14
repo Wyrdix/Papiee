@@ -19,10 +19,8 @@ jobs:
           node-version: '24.x'
       - run: ls
       - run: pwd
-      - run: cd static
-      - run: ls
-      - run: pwd
-      - run: 'curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.TOKEN }}" -L -o worker_artifact.zip "https://api.github.com/repos/ejgallego/rocq-lsp/actions/artifacts/4518852242/zip"'
+      - run: cd src && ls
+      - run: 'cd static && curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.TOKEN }}" -L -o worker_artifact.zip "https://api.github.com/repos/ejgallego/rocq-lsp/actions/artifacts/4518852242/zip"'
       - run: ls
       - run: pwd
       - run: cd ../
